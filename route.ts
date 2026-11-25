@@ -3,11 +3,15 @@
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
-  const signature = req.headers.get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+  if (!webhookSecret) {
+    // Server misconfiguration, not a bad request: return 5xx so it shows up and Stripe retries.
+    return new Response("STRIPE_WEBHOOK_SECRET is not set", { status: 500 });
+  }
 
-  if (!signature || !webhookSecret) {
-    return new Response("Missing Stripe signature or webhook secret", { status: 400 });
+  const signature = req.headers.get("stripe-signature");
+  if (!signature) {
+    return new Response("Missing Stripe signature", { status: 400 });
   }
 
   // Raw unparsed body is mandatory for HMAC verification.
