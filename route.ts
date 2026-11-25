@@ -2,8 +2,6 @@
 // Guide: https://shipmate.agency/articles/stripe-webhook-signature-error-fix
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 export async function POST(req: Request) {
   const signature = req.headers.get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
@@ -17,7 +15,9 @@ export async function POST(req: Request) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    // Static helper: verifying a signature needs only the webhook secret, not an API key,
+    // so `next build` works without STRIPE_SECRET_KEY. Also rejects timestamps older than 5 minutes.
+    event = Stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch {
     return new Response("Invalid Stripe signature", { status: 400 });
   }
