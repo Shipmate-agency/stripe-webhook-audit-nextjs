@@ -27,10 +27,17 @@ export async function POST(req: Request) {
   }
 
   switch (event.type) {
-    case "checkout.session.completed": {
+    case "checkout.session.completed":
+    case "checkout.session.async_payment_succeeded": {
       const session = event.data.object as Stripe.Checkout.Session;
-      // Record event.id in a processed_events table for idempotency before granting access.
-      void session;
+      // Delayed methods (ACH, bank transfer) complete as "unpaid" and succeed later via
+      // checkout.session.async_payment_succeeded. Only fulfill once paid.
+      if (session.payment_status !== "unpaid") {
+        // Stripe can deliver the same event more than once, even concurrently. Make fulfillment
+        // idempotent: e.g. INSERT session.id into a table with a UNIQUE constraint in the same DB
+        // transaction that grants access, and skip if it already exists. Fetch amounts and line
+        // items from Stripe by session.id, never from client-supplied data.
+      }
       break;
     }
     default:
