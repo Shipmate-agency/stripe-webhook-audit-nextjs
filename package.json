@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test.mjs",
+    "typecheck": "tsc --noEmit --strict --skipLibCheck --target es2022 --module nodenext --lib es2022,dom route.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "stripe": "^23.2.0",
+    "typescript": "^5.9.0"
+  }
+}

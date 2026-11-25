@@ -1,4 +1,4 @@
-// Verified Next.js App Router Stripe webhook handler
+// Next.js App Router Stripe webhook handler with signature verification (tested: npm test)
 // Guide: https://shipmate.agency/articles/stripe-webhook-signature-error-fix
 import Stripe from "stripe";
 
